@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+   <head>
+     <meta charset="utf-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <title>Log in — Smart Canteen</title>
+     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+   </head>
+   <body>
+     <header class="site-header">
+       <div class="nav-shell">
+          <a class="brand" href="{{ url_for('index') }}" aria-label="Smart Canteen home">
+            <span class="brand-mark">S</span><span class="brand-name">Smart Canteen<small>Campus made easy</small></span>
+          </a>
+          <nav class="primary-navigation" id="primary-navigation" aria-label="Main navigation">
+            <a href="{{ url_for('index') }}#menu">Home / Menu</a><a href="{{ url_for('index') }}#how-it-works">How it works</a>
+          </nav>
+          <div class="nav-actions"><a class="button button-secondary button-small" href="{{ url_for('register') }}">Create account</a></div>
+          <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+          </button>
+       </div>
+     </header>
+     <main class="subpage-main">
+       <div class="auth-layout">
+          <aside class="auth-aside">
+            <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">S</span><span class="brand-name">Smart Canteen<small>Campus made easy</small></span></a>
+            <div class="auth-aside-copy">
+               <span class="eyebrow">Good to see you</span>
+               <h1>Your next break is just a few taps away.</h1>
+               <p>Log in, choose your favourites, and let your digital token do the waiting.</p>
+            </div>
+            <p class="auth-aside-note">A little more time for what matters between classes.</p>
+          </aside>
+          <section class="auth-form-side" aria-labelledby="login-title">
+            <h2 id="login-title">Welcome back.</h2>
+            <p class="auth-form-intro">Log in to your student account to continue.</p>
+            {% if access_error %}<div class="form-alert" role="alert">{{ access_error }}</div>{% endif %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+               {% if messages %}{% for category, message in messages %}{% if category == 'error' %}<div class="form-alert" role="alert">{{ message }}</div>{% endif %}{% endfor %}{% endif
+%}
+            {% endwith %}
+            <form class="form-stack" action="{{ url_for('login') }}" method="post">
+               <input type="hidden" name="next" value="{{ next_url }}">
+               <div class="form-field">
+                 <label for="email">Email address</label>
+                 <input id="email" name="email" type="email" autocomplete="email" placeholder="you@college.edu" maxlength="254" required>
+               </div>
+               <div class="form-field">
+                 <label for="password">Password</label>
+                 <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+               </div>
+               <button class="button button-primary form-submit" type="submit">Log in <span aria-hidden="true">→</span></button>
+            </form>
+          <p class="form-switch">New to Smart Canteen? <a href="{{ url_for('register') }}">Create your account</a></p>
+          <div class="auth-help"><strong>Demo administrator:</strong> admin@smartcanteen.com<br><strong>Password:</strong> Admin@123</div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer"><div class="page-container footer-inner"><span>© 2026 Smart Canteen</span><a href="{{ url_for('index') }}">Back to menu</a></div></footer>
+  </body>
+</html>

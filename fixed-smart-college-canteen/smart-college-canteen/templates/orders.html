@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My orders — Smart Canteen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-shell">
+         <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">S</span><span class="brand-name">Smart Canteen<small>Campus made easy</small></span></a>
+         <nav class="primary-navigation" id="primary-navigation" aria-label="Main navigation">
+           <a href="{{ url_for('index') }}#menu">Home / Menu</a><a href="{{ url_for('index') }}#how-it-works">How it works</a><a href="{{ url_for('orders') }}">My orders</a>
+           {% if session.get('role') == 'admin' %}<a href="{{ url_for('admin') }}">Admin</a>{% endif %}
+         </nav>
+         <div class="nav-actions"><span class="nav-user">Hi, {{ session.get('name') }}</span><form action="{{ url_for('logout') }}" method="post"><button class="nav-account nav-logout"
+type="submit">Logout</button></form></div>
+         <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
+           <span></span><span></span><span></span>
+         </button>
+      </div>
+    </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<div class="flash-stack" role="status">{% for category, message in messages %}<div class="flash-message {{ category }}">{{ message }}</div>{% endfor %}</div>{%
+endif %}
+    {% endwith %}
+    <main class="subpage-main">
+      <div class="page-container">
+         <div class="account-page-heading">
+           <div><span class="eyebrow">Your campus orders</span><h1>My orders</h1><p>Every token, right here when you need it.</p></div>
+           <a class="button button-primary" href="{{ url_for('index') }}#menu">Order something good <span aria-hidden="true">↗</span></a>
+         </div>
+         {% if orders %}
+           <div class="orders-list">
+             {% for order in orders %}
+               <article class="order-card">
+                 <div class="order-card__top">
+                   <div><span class="order-card__token">{{ order.token }}</span><span class="order-card__date">{{ order.created_at }}</span></div>
+                   <span class="status-badge {{ order.status|lower }}">{{ order.status }}</span>
+                 </div>
+                 <div class="order-card__items">
+                   {% for item in items_by_order[order.id] %}
+                     <span class="item-chip">{{ item.food_name }} × {{ item.quantity }}</span>
+                   {% endfor %}
+                 </div>
+                 <div class="order-card__bottom">
+                   <span class="order-total">₹{{ "%.2f"|format(order.total) }}</span>
+                   <a class="button button-secondary button-small" href="{{ url_for('token', order_id=order.id) }}">View token <span aria-hidden="true">→</span></a>
+                 </div>
+               </article>
+             {% endfor %}
+           </div>
+         {% else %}
+          <section class="empty-state">
+             <span class="empty-state__icon" aria-hidden="true">⌑</span>
+             <h2>No orders yet.</h2>
+             <p>When you place your first order, its token and status will be waiting here.</p>
+             <a class="button button-primary" href="{{ url_for('index') }}#menu">Browse the menu</a>
+          </section>
+        {% endif %}
+      </div>
+    </main>
+    <footer class="site-footer"><div class="page-container footer-inner"><a class="footer-brand" href="{{ url_for('index') }}"><span class="brand-mark">S</span> Smart Canteen</a>
+<span>© 2026 Smart Canteen</span><a href="{{ url_for('index') }}">Back to menu</a></div></footer>
+  </body>
+</html>

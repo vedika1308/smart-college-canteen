@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Order ahead at your college canteen, skip the queue, and collect your meal with a digital token.">
+    <title>Smart Canteen — Order smart. Skip the queue.</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+  </head>
+  <body
+    data-authenticated="{{ 'true' if session.get('user_id') else 'false' }}"
+    data-login-url="{{ url_for('login', next=url_for('index')) }}"
+    data-place-order-url="{{ url_for('place_order') }}"
+  >
+    <header class="site-header">
+      <div class="nav-shell">
+         <a class="brand" href="{{ url_for('index') }}" aria-label="Smart Canteen home">
+           <span class="brand-mark">S</span>
+           <span class="brand-name">Smart Canteen<small>Campus made easy</small></span>
+         </a>
+         <nav class="primary-navigation" id="primary-navigation" aria-label="Main navigation">
+           <a href="#menu">Home / Menu</a>
+           <a href="#how-it-works">How it works</a>
+           {% if session.get('user_id') %}
+              <a href="{{ url_for('orders') }}">My orders</a>
+              {% if session.get('role') == 'admin' %}<a href="{{ url_for('admin') }}">Admin</a>{% endif %}
+           {% endif %}
+           {% if not session.get('user_id') %}
+              <a href="{{ url_for('login') }}">Login</a>
+              <a href="{{ url_for('register') }}">Register</a>
+           {% endif %}
+         </nav>
+         <div class="nav-actions">
+           {% if session.get('user_id') %}
+              <span class="nav-user">Hi, {{ session.get('name') }}</span>
+              <form action="{{ url_for('logout') }}" method="post">
+                <button class="nav-account nav-logout" type="submit">Logout</button>
+              </form>
+           {% endif %}
+           <button class="nav-cart" type="button" data-open-cart aria-label="Open shopping cart">
+              <svg class="cart-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 4h2l2.1 10.1a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 1.9-1.4L22 8H6"></path>
+                <circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle>
+              </svg>
+              <span>Cart</span><span class="cart-count" id="cart-count">0</span>
+           </button>
+           <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
+              <span></span><span></span><span></span>
+           </button>
+         </div>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-stack" role="status">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<main>
+  <section class="page-container hero" id="home">
+    <div class="hero-copy">
+       <span class="eyebrow"><span class="eyebrow-dot"></span>Your campus, served smarter</span>
+       <h1>Order Smart.<br><span>Skip the Queue.</span></h1>
+       <p>Good food, right on time. Pick your favourites before the break, get a digital token, and collect your order without the wait.</p>
+       <div class="button-row">
+         <a class="button button-primary" href="#menu">Browse the menu <span aria-hidden="true">↗</span></a>
+         <a class="button button-secondary" href="#how-it-works">How it works <span aria-hidden="true">↓</span></a>
+       </div>
+       <div class="hero-proof">
+         <div class="proof-avatars" aria-hidden="true"><span>AK</span><span>RS</span><span>PM</span></div>
+         <div class="proof-copy"><strong>A better break starts here</strong>Made for busy campus days</div>
+       </div>
+    </div>
+    <div class="hero-art" aria-label="Freshly prepared campus canteen food">
+       <div class="hero-food-photo">
+         <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1100&q=90" alt="Fresh, stacked vegetarian burger" fetchpriority="high">
+       </div>
+       <div class="hero-sticker">Fresh<br>breaks<br>ahead</div>
+       <div class="token-preview" aria-label="Example digital token C108, preparing">
+         <div class="token-preview__top"><span>YOUR DIGITAL TOKEN</span><span class="status-pill">Preparing</span></div>
+         <p class="token-preview__number">C108</p>
+         <p class="token-preview__caption">We’ll let you know when it’s ready.</p>
+         <div class="token-preview__divider"></div>
+         <div class="token-preview__bottom"><strong>Veg Burger + Cold Coffee</strong><span>2 items</span></div>
+       </div>
+    </div>
+  </section>
+
+  <section class="page-container trust-strip" aria-label="Ordering benefits">
+    <div class="trust-item"><span class="trust-icon">↗</span><div><strong>Order ahead</strong><span>Choose before the rush</span></div></div>
+    <div class="trust-item"><span class="trust-icon">◷</span><div><strong>Skip the queue</strong><span>Your break is yours</span></div></div>
+    <div class="trust-item"><span class="trust-icon">#</span><div><strong>Track your token</strong><span>Know when to collect</span></div></div>
+    <div class="trust-item"><span class="trust-icon">✓</span><div><strong>Easy pickup</strong><span>Fresh food, right on time</span></div></div>
+  </section>
+
+  <section class="page-container section menu-section" id="menu">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Made for your break</span>
+        <h2>Find your campus favourite.</h2>
+      </div>
+      <p>From quick bites between lectures to a proper lunch with friends, there's something good waiting for you.</p>
+    </div>
+    <div class="menu-toolbar">
+      <div class="filter-list" role="group" aria-label="Filter menu by category">
+        <button class="filter-button is-active" type="button" data-category-filter="All" aria-pressed="true">All items</button>
+        <button class="filter-button" type="button" data-category-filter="Snacks" aria-pressed="false">Snacks</button>
+      <button class="filter-button" type="button" data-category-filter="Drinks" aria-pressed="false">Drinks</button>
+      <button class="filter-button" type="button" data-category-filter="Meals" aria-pressed="false">Meals</button>
+    </div>
+    <span class="menu-note">Freshly prepared on campus · Prices in ₹</span>
+  </div>
+  <div class="food-grid">
+    {% for food in foods %}
+      <article
+        class="food-card"
+        data-id="{{ food.id }}"
+        data-name="{{ food.name }}"
+        data-description="{{ food.description }}"
+        data-price="{{ food.price }}"
+        data-category="{{ food.category }}"
+        data-image="{{ food.image }}"
+      >
+        <div class="food-card__image">
+          <img src="{{ food.image }}" alt="{{ food.name }}" loading="lazy">
+          <span class="food-card__category">{{ food.category }}</span>
+        </div>
+        <div class="food-card__body">
+          <div class="food-card__title-row">
+            <h3>{{ food.name }}</h3>
+            <span class="food-card__price">₹{{ "%.0f"|format(food.price) }}</span>
+          </div>
+          <p>{{ food.description }}</p>
+          <button class="add-button" type="button" data-add-to-cart="{{ food.id }}" aria-label="Add {{ food.name }} to cart">
+            <span>Add to cart</span><span aria-hidden="true">+</span>
+          </button>
+        </div>
+      </article>
+    {% else %}
+      <p>The menu is being updated. Please check back soon.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="how-section" id="how-it-works">
+  <div class="page-container">
+    <div class="section-heading">
+      <div><span class="eyebrow">Five easy steps</span><h2>From hungry to happy.</h2></div>
+      <p>Your break is short. Ordering shouldn't take it up.</p>
+    </div>
+    <div class="steps-grid">
+      <article class="step-card"><span class="step-number">01</span><h3>Log in</h3><p>Create your student account in a moment.</p></article>
+      <article class="step-card"><span class="step-number">02</span><h3>Select food</h3><p>Pick a favourite from the canteen menu.</p></article>
+      <article class="step-card"><span class="step-number">03</span><h3>Place order</h3><p>Review your cart and confirm your order.</p></article>
+      <article class="step-card"><span class="step-number">04</span><h3>Get your token</h3><p>Keep an eye on your order's live status.</p></article>
+      <article class="step-card"><span class="step-number">05</span><h3>Collect food</h3><p>Show your token and enjoy your break.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="page-container section benefits-section" id="about">
+  <div class="benefits-layout">
+    <div class="benefit-intro">
+      <span class="eyebrow">A smarter campus break</span>
+      <h2>Less waiting.<br>More living.</h2>
+            <p>Smart Canteen gives students a simpler way to order and helps the canteen keep every order organised.</p>
+            <a class="button button-secondary" href="#menu">Explore the menu <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="benefit-list">
+            <article class="benefit-card"><span class="benefit-card__icon">↗</span><h3>Faster ordering</h3><p>Choose your food before you reach the counter.</p></article>
+            <article class="benefit-card"><span class="benefit-card__icon">◷</span><h3>Less waiting</h3><p>Spend your break with friends, not in a line.</p></article>
+            <article class="benefit-card"><span class="benefit-card__icon">#</span><h3>Digital token</h3><p>One clear number to follow from order to pickup.</p></article>
+            <article class="benefit-card"><span class="benefit-card__icon">✓</span><h3>Organised orders</h3><p>Students and canteen staff stay on the same page.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="page-container closing-cta">
+        <div><h2>Your next break could be better.</h2><p>Find something you love and order it ahead.</p></div>
+        <a class="button button-primary" href="#menu">Order something good <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="page-container footer-inner">
+        <a class="footer-brand" href="{{ url_for('index') }}"><span class="brand-mark">S</span> Smart Canteen</a>
+        <span>Made for campus life. © {{ 2026 }} Smart Canteen</span>
+        <a href="#home">Back to top ↑</a>
+      </div>
+    </footer>
+
+    <aside class="cart-panel" id="cart-panel" aria-hidden="true" aria-labelledby="cart-heading" inert>
+      <div class="cart-panel__header">
+        <h2 id="cart-heading">Your cart <span class="cart-count" id="cart-count">0</span></h2>
+        <button class="icon-button" id="cart-close" type="button" aria-label="Close cart">×</button>
+      </div>
+      <div class="cart-empty" id="cart-empty">
+                                                          ＋
+        <span class="cart-empty__icon" aria-hidden="true"> </span>
+        <strong>Your cart is taking a break.</strong>
+        <p>Add something tasty from the menu and it’ll show up here.</p>
+        <a class="button button-secondary" href="#menu" data-close-cart>Browse menu</a>
+      </div>
+      <div class="cart-items" id="cart-items" hidden></div>
+      <div class="cart-summary">
+        <div class="cart-summary__row"><span>Items</span><span id="cart-subtotal">₹0</span></div>
+        <div class="cart-summary__row total"><span>Total</span><span id="cart-total">₹0</span></div>
+        <button class="button button-primary" id="place-order" type="button" disabled>Place order</button>
+        <p class="cart-disclaimer">Payment is made at the canteen counter when you collect.</p>
+      </div>
+    </aside>
+    <div class="cart-backdrop" id="cart-backdrop"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

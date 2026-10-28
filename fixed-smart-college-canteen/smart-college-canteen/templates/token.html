@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ order.token }} — Digital token | Smart Canteen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-shell">
+         <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">S</span><span class="brand-name">Smart Canteen<small>Campus made easy</small></span></a>
+         <nav class="primary-navigation" id="primary-navigation" aria-label="Main navigation"><a href="{{ url_for('index') }}#menu">Home / Menu</a><a href="{{ url_for('orders') }}">My
+orders</a></nav>
+         <div class="nav-actions"><a class="nav-account" href="{{ url_for('orders') }}">All orders</a></div>
+         <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
+           <span></span><span></span><span></span>
+         </button>
+      </div>
+    </header>
+    <main class="subpage-main">
+      <div class="token-page">
+         <div class="token-success">
+           <span class="token-success__mark" aria-hidden="true">✓</span>
+           <h1>Order placed!</h1>
+           <p>Your canteen team has your order. Keep this token handy for pickup.</p>
+         </div>
+         <article class="digital-token">
+           <div class="digital-token__brand">
+             <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">S</span><span class="brand-name">Smart Canteen<small>Digital pickup token</small></span></a>
+             <span class="status-badge {{ order.status|lower }}">{{ order.status }}</span>
+           </div>
+           <p class="digital-token__label" style="margin: 22px 0 0; text-align: center;">Your order token</p>
+           <p class="digital-token__number">{{ order.token }}</p>
+           <p class="digital-token__hint">Show this number at the canteen counter.</p>
+           <hr class="token-dash">
+           <div class="token-detail-grid">
+             <div class="token-detail"><span>Total amount</span><strong>₹{{ "%.2f"|format(order.total) }}</strong></div>
+             <div class="token-detail"><span>Order status</span><strong>{{ order.status }}</strong></div>
+             <div class="token-detail"><span>Order placed</span><strong>{{ order.created_at }}</strong></div>
+           </div>
+           <section class="token-items">
+             <h2>Items in this order</h2>
+             {% for item in items %}
+               <div class="token-item-row"><span>{{ item.food_name }} × {{ item.quantity }}</span><span>₹{{ "%.2f"|format(item.price * item.quantity) }}</span></div>
+             {% endfor %}
+             <div class="token-total"><span>Total</span><span>₹{{ "%.2f"|format(order.total) }}</span></div>
+           </section>
+         </article>
+         <div class="token-actions">
+           <a class="button button-primary" href="{{ url_for('orders') }}">View my orders</a>
+           <a class="button button-secondary" href="{{ url_for('index') }}#menu">Order again</a>
+         </div>
+      </div>
+    </main>
+    <footer class="site-footer"><div class="page-container footer-inner"><span>© 2026 Smart Canteen</span><span>Keep your token handy for pickup.</span></div></footer>
+  </body>
+</html>
